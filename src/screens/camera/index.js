@@ -104,7 +104,7 @@ export const analyzeGenderAgeRN = async (uri) => {
  */
 function estaOlhandoParaFrente(rosto) {
   // Limites aceitáveis para os ângulos de rotação da cabeça (em graus)
-  const LIMITE_PITCH = 10; // Inclinação para cima/baixo
+  const LIMITE_PITCH = 3; // Inclinação para cima/baixo
   const LIMITE_ROLL = 10; // Inclinação lateral (ombro)
   const LIMITE_YAW = 10; // Rotação esquerda/direita
 
@@ -147,7 +147,7 @@ export default function CameraScreen() {
   const [isGazing, setIsGazing] = useState(false); //verifica se o usuário está olhando para a câmera
   const [photo, setPhoto] = useState(true);
   const [spinner, setSpinner] = useState(false);
-  const { setServerPhotoPath, matricula } = appContext();
+  const { setServerPhotoPath, matricula, setMatriculaFormatada } = appContext();
   const camera = useRef(null);
   const navigation = useNavigation();
 
@@ -246,17 +246,37 @@ export default function CameraScreen() {
             _genero = "01";
           }
 
-          const matriculaFormatada =
-            matricula +
+          let _primerioCaracter = matricula.toString().substring(0, 1);
+
+          let _matricula;
+
+          //Uso estes testes para saber que tipo de prefixo por em cada foto, para busca-las no servidor adequadamente!
+          if (matricula.toString().length <= 6) {
+            _matricula = "014" + matricula.toString().padStart(6, "0");
+          }
+
+          if (_primerioCaracter === "8" && matricula.toString().length >= 6) {
+            _matricula = "0" + matricula.toString().padStart(6, "0");
+          }
+
+          if (matricula.length > 6 && _primerioCaracter != "8") {
+            _matricula = matricula.toString().padStart(6, "0"); // Alguns casos não estão nos padrões das matriculas que usamos, sendo assim vai entrar dessa maneira na pasta de imagem, apenas a matricula
+          }
+
+          const _matriculaFormatada =
+            _matricula +
             _genero +
             String(idade_aproximada).padStart(2, "0").concat(".jpg");
 
-          console.log("matriculaFormatada", matriculaFormatada);
+          setMatriculaFormatada(_matriculaFormatada);
 
-          await uploadImageToComlurb(cleanedPath, matriculaFormatada);
+          console.log("matriculaFormatada", _matriculaFormatada);
+
+          await uploadImageToComlurb(cleanedPath, _matriculaFormatada);
           setSpinner(false);
           navigation.navigate("Sucesso");
         } catch (error) {
+          console.logh(error);
           setIsGazing(false); // Resetar mesmo em caso de erro
           setPhoto(false);
         }

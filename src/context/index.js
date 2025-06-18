@@ -15,6 +15,8 @@ export const AppProvider = ({ children }) => {
   const [photoPath, setPhotoPath] = useState(null); // Caminho da foto tirada pela camedra do app
   const [serverPhotoPath, setServerPhotoPath] = useState(null); // Caminho da foto usada no passaport
   const [matricula, setMatricula] = useState(null);
+  const [matriculFormatada, setMatriculaFormatada] = useState(null);
+  const [arquivos, setArquivos] = useState([]);
 
   // O valor que será disponibilizado para os componentes filhos
   const AppContextValue = {
@@ -24,6 +26,10 @@ export const AppProvider = ({ children }) => {
     setServerPhotoPath,
     matricula,
     setMatricula,
+    arquivos,
+    setArquivos,
+    matriculFormatada,
+    setMatriculaFormatada,
   };
 
   return (

@@ -8,10 +8,70 @@ import { Button, ButtonText } from "@/components/ui/button";
 import { Image } from "@/components/ui/image";
 import { appContext } from "@/src/context";
 import { useEffect } from "react";
+import RNFetchBlob from "rn-fetch-blob";
 
 export default function SucessoScreen() {
   const navigation = useNavigation();
-  const { serverPhotoPath, setServerPhotoPath } = appContext();
+  const { serverPhotoPath, setServerPhotoPath, matriculFormatada } =
+    appContext();
+
+  useEffect(() => {
+    console.log(matriculFormatada);
+  }, []);
+
+  /**
+   * Envia uma requisição POST para apagar uma imagem no servidor PHP.
+   * @param {string} imageName - O nome completo do arquivo da imagem a ser apagada (ex: "minha_foto.jpg").
+   * @returns {Promise<Object>} - Uma promessa que resolve com a resposta JSON do servidor ou rejeita com um erro.
+   */
+  const deleteImage = async () => {
+    // Substitua pela URL real do seu script PHP de exclusão.
+    // Ex: 'http://seu_ip_do_servidor/Extranet/Fotos/fotoRecoginizer/delete_image.php'
+    const SERVER_URL =
+      "https://comlurbdev.rio.rj.gov.br/extranet/Fotos/fotoRecoginizer/delete.php";
+
+    // Validação básica do nome da imagem
+
+    console.log("matriculFormatada", matriculFormatada);
+
+    try {
+      const response = await RNFetchBlob.fetch(
+        "POST", // Método da requisição
+        SERVER_URL, // URL do script PHP
+        {
+          // Headers da requisição (Content-Type é importante para 'x-www-form-urlencoded')
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        // Corpo da requisição: os dados devem ser formatados como 'chave=valor'
+        // URLSearchParams ajuda a garantir a formatação correta para x-www-form-urlencoded
+        `image_name=${encodeURIComponent(matriculFormatada)}`
+      );
+
+      // Converte a resposta para texto (JSON string)
+      const responseText = response.data;
+
+      // Tenta fazer o parse do JSON
+      const responseJson = JSON.parse(responseText);
+
+      // Verifica o status HTTP da resposta
+      if (response.respInfo.status >= 200 && response.respInfo.status < 300) {
+        // Requisição bem-sucedida (status 2xx)
+        console.log("Imagem apagada com sucesso:", responseJson);
+        navigation.navigate("Luz");
+        return responseJson;
+      } else {
+        // Requisição com erro (status 4xx ou 5xx)
+        console.error("Erro ao apagar imagem:", responseJson);
+        throw new Error(
+          responseJson.message || "Erro desconhecido ao apagar imagem."
+        );
+      }
+    } catch (error) {
+      console.error("Erro na requisição deleteImage:", error);
+      // Relança o erro para que a função que chamou possa tratá-lo
+      throw error;
+    }
+  };
 
   useEffect(() => {
     console;
@@ -55,10 +115,19 @@ export default function SucessoScreen() {
         />
 
         <Button
-          className='h-24 w-24 bg-green-800 rounded-full mt-6'
+          className='h-32 w-32 bg-red-800 rounded-full mt-6'
+          onPress={() => {
+            deleteImage();
+          }}
+        >
+          <ButtonText className='text-2xl'>Apagar</ButtonText>
+        </Button>
+
+        <Button
+          className='h-32 w-32 bg-green-800 rounded-full mt-6'
           onPress={handleOK}
         >
-          <ButtonText className='text-2xl'>OK</ButtonText>
+          <ButtonText className='text-2xl'>Aceitar</ButtonText>
         </Button>
       </VStack>
     </GluestackUIProvider>

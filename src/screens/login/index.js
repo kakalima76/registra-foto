@@ -15,8 +15,8 @@ const image = require("../../../assets/login.jpg"); // Caminho relativo para sua
 
 export default function LoginScreen() {
   const navigation = useNavigation();
-  const { setServerPhotoPath, matricula, setMatricula } = appContext();
-  const [arquivos, setArquivos] = useState([]);
+  const { setServerPhotoPath, matricula, setMatricula, arquivos, setArquivos } =
+    appContext();
 
   /**
    * Lista todos os arquivos de imagens disponíveis no servidor
@@ -75,16 +75,18 @@ export default function LoginScreen() {
       return;
     }
 
+    if (!arquivos.length) {
+      navigation.navigate("Camera");
+    }
+
     const _files = arquivos.map((x) => x.substring(0, 8));
     let _includes = _files.includes(matricula);
-
-    console.log(_includes);
     let _matricula;
+    console.log(_files);
 
     const filter = arquivos.filter((x) => x.substring(0, 8) === matricula)[0];
-    console.log(filter);
     _matricula = filter;
-    console.log("_matricula", _matricula);
+    console.log("_matricula", _matricula, _includes);
 
     if (!_includes) {
       navigation.navigate("Luz");
@@ -94,6 +96,8 @@ export default function LoginScreen() {
     }
 
     const imageUrl = `https://comlurbdev.rio.rj.gov.br/extranet/Fotos/fotoRecoginizer/downlaod.php?file=${_matricula}`;
+
+    console.log(imageUrl);
 
     try {
       const res = await RNFetchBlob.config({

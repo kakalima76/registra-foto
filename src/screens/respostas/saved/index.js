@@ -55,7 +55,7 @@ export default function SavedScreen() {
         />
 
         <Button
-          className='h-24 w-24 bg-green-800 rounded-full mt-6'
+          className='h-32 w-32 bg-green-800 rounded-full mt-6'
           onPress={handleOK}
         >
           <ButtonText className='text-2xl'>OK</ButtonText>
