@@ -1,3 +1,4 @@
+//#region IMPORTS
 import "react-native-reanimated"; // Mantido para consistência com seu modelo
 import "@/global.css"; // Mantido para consistência com seu modelo
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
@@ -10,15 +11,18 @@ import { appContext } from "@/src/context";
 import { useEffect } from "react";
 import RNFetchBlob from "rn-fetch-blob";
 
+//#endregion
+
 export default function SucessoScreen() {
+  //#region ESTADOS
+
   const navigation = useNavigation();
   const { serverPhotoPath, setServerPhotoPath, matriculFormatada } =
     appContext();
 
-  useEffect(() => {
-    console.log(matriculFormatada);
-  }, []);
+  //#endregion
 
+  //#region FUNÇÕES PRINCIPAIS
   /**
    * Envia uma requisição POST para apagar uma imagem no servidor PHP.
    * @param {string} imageName - O nome completo do arquivo da imagem a ser apagada (ex: "minha_foto.jpg").
@@ -73,15 +77,12 @@ export default function SucessoScreen() {
     }
   };
 
-  useEffect(() => {
-    console;
-    console.log("serverPhotoPath", serverPhotoPath);
-  }, []);
-
   const handleOK = () => {
     setServerPhotoPath(null);
     navigation.navigate("Login");
   };
+
+  //#endregion
 
   return (
     <GluestackUIProvider mode='light'>

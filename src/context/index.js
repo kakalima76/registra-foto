@@ -18,6 +18,18 @@ export const AppProvider = ({ children }) => {
   const [matriculFormatada, setMatriculaFormatada] = useState(null);
   const [arquivos, setArquivos] = useState([]);
 
+  /**
+   * Reseta todos os estados relacionados à foto, matrícula e arquivos para seus valores iniciais.
+   * @returns {void}
+   */
+  const resetaTudo = () => {
+    setPhotoPath(null);
+    setServerPhotoPath(null);
+    setMatricula(null);
+    setMatriculaFormatada(null);
+    setArquivos([]);
+  };
+
   // O valor que será disponibilizado para os componentes filhos
   const AppContextValue = {
     photoPath,
@@ -30,6 +42,7 @@ export const AppProvider = ({ children }) => {
     setArquivos,
     matriculFormatada,
     setMatriculaFormatada,
+    resetaTudo,
   };
 
   return (

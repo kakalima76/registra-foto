@@ -12,6 +12,7 @@ import SucessoScreen from "../screens/respostas/sucesso";
 import InsucessoScreen from "../screens/respostas/insucesso";
 import ErrorPhotoScreen from "../screens/respostas/errors";
 import SavedScreen from "../screens/respostas/saved";
+import ErrorListarScreen from "../screens/respostas/errors/listar";
 
 // Importe suas telas
 
@@ -82,6 +83,12 @@ function AppStack() {
         <Stack.Screen
           name='ErrorPhoto'
           component={ErrorPhotoScreen}
+          options={{ headerShown: false }} // Título do cabeçalho para a tela inicial
+        />
+
+        <Stack.Screen
+          name='ErrorListar'
+          component={ErrorListarScreen}
           options={{ headerShown: false }} // Título do cabeçalho para a tela inicial
         />
       </Stack.Navigator>

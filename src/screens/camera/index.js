@@ -17,6 +17,7 @@ import colors from "tailwindcss/colors";
 import { appContext } from "@/src/context";
 import { useNavigation } from "@react-navigation/native";
 import RNFetchBlob from "rn-fetch-blob";
+import ImageResizer from "react-native-image-resizer";
 const GENDER_API_URL =
   "https://comlurbdev.rio.rj.gov.br/extranet/Fotos/fotoRecoginizer/gender.php";
 
@@ -32,58 +33,6 @@ const getMimeType = (uri) => {
   if (extension === "jpg" || extension === "jpeg") return "image/jpeg";
   if (extension === "png") return "image/png";
   return "application/octet-stream"; // Generic fallback
-};
-
-/**
- * Consome o endpoint PHP de análise de idade e gênero.
- * Envia uma imagem e recebe a idade e o gênero estimados.
- * @param {string} uri - URI da imagem no dispositivo.
- * @returns {Promise<object|null>} Uma Promise que resolve com o resultado da análise em caso de sucesso, ou null em caso de erro.
- */
-export const analyzeGenderAgeRN = async (uri) => {
-  if (!uri) {
-    Alert.alert("Erro", "Por favor, selecione uma imagem para análise.");
-    return null;
-  }
-
-  try {
-    const response = await RNFetchBlob.fetch(
-      "POST",
-      GENDER_API_URL,
-      {
-        "Content-Type": "multipart/form-data",
-      },
-      [
-        {
-          name: "imagem",
-          filename: "image.jpg",
-          type: getMimeType(uri),
-          data: RNFetchBlob.wrap(uri),
-        },
-      ]
-    );
-
-    const result = await response.json();
-    console.log("result", result);
-
-    if (response.respInfo.status === 200) {
-      return result;
-    } else {
-      Alert.alert(
-        "Erro na API",
-        result.message || "Ocorreu um erro na análise de idade e gênero."
-      );
-      console.error("Erro na análise:", result);
-      return null;
-    }
-  } catch (error) {
-    Alert.alert(
-      "Erro de Rede",
-      "Não foi possível conectar ao servidor. Verifique sua conexão ou a URL."
-    );
-    console.error("Erro de rede/request:", error);
-    return null;
-  }
 };
 
 /**
@@ -152,12 +101,59 @@ export default function CameraScreen() {
   const navigation = useNavigation();
 
   /**
-   * Realiza o upload de uma imagem para o servidor da Comlurb
+   * Consome o endpoint PHP de análise de idade e gênero.
+   * Envia uma imagem e recebe a idade e o gênero estimados.
+   * @param {string} uri - URI da imagem no dispositivo.
+   * @returns {Promise<object|null>} Uma Promise que resolve com o resultado da análise em caso de sucesso, ou null em caso de erro.
+   */
+  const analyzeGenderAgeRN = async (uri) => {
+    if (!uri) {
+      Alert.alert("Erro", "Por favor, selecione uma imagem para análise.");
+      return null;
+    }
+
+    try {
+      const response = await RNFetchBlob.fetch(
+        "POST",
+        GENDER_API_URL,
+        {
+          "Content-Type": "multipart/form-data",
+        },
+        [
+          {
+            name: "imagem",
+            filename: "image.jpg",
+            type: getMimeType(uri),
+            data: RNFetchBlob.wrap(uri),
+          },
+        ]
+      );
+
+      const result = await response.json();
+      console.log("result", result);
+
+      if (response.respInfo.status === 200) {
+        return result;
+      } else {
+        Alert.alert(
+          "Erro na API",
+          result.message || "Ocorreu um erro na análise de idade e gênero."
+        );
+        console.error("Erro na análise:", result);
+        return null;
+      }
+    } catch (error) {
+      navigation.navigate("ErrorPhoto");
+    }
+  };
+
+  /**
+   * Redimensiona e realiza o upload de uma imagem para o servidor da Comlurb
    * @function uploadImageToComlurb
    * @param {string} imagePath - Caminho local da imagem no dispositivo (pode incluir prefixo file://)
    * @param {string} imageName - Nome que será atribuído à imagem no servidor
    * @returns {Promise<string>} Promise que resolve com a resposta textual do servidor
-   * @throws {Error} Lança erro caso o upload falhe
+   * @throws {Error} Lança erro caso o redimensionamento ou upload falhem
    *
    * @example
    * // Exemplo de uso:
@@ -169,12 +165,24 @@ export default function CameraScreen() {
    * .catch(error => console.error(error));
    */
   const uploadImageToComlurb = async (imagePath, imageName) => {
-    // URL do endpoint
     const url =
       "https://comlurbdev.rio.rj.gov.br/extranet/Fotos/fotoRecoginizer/upload.php";
 
-    // Cria o objeto de dados para o POST
     try {
+      // 1. Redimensiona a imagem antes do upload
+      const { uri: resizedUri } = await ImageResizer.createResizedImage(
+        imagePath.replace("file://", ""), // Remove prefixo se existir
+        224, // Largura máxima
+        224, // Altura máxima
+        "JPEG", // Formato
+        80, // Qualidade
+        0, // Rotação
+        undefined // Caminho padrão
+      );
+
+      console.log("imagem redimensionada");
+
+      // 2. Faz upload da versão redimensionada
       const response = await RNFetchBlob.fetch(
         "POST",
         url,
@@ -182,24 +190,29 @@ export default function CameraScreen() {
           "Content-Type": "multipart/form-data",
         },
         [
-          // Adiciona o campo 'imagem' com o arquivo
           {
             name: "imagem",
             filename: imageName,
-            data: RNFetchBlob.wrap(imagePath),
+            data: RNFetchBlob.wrap(resizedUri),
           },
-          // Adiciona o campo 'name' com o nome da imagem
           { name: "name", data: imageName },
         ]
       );
-      // Sucesso - você pode tratar a resposta aqui
-      console.log(response);
+
+      console.log("imagem, uploudiada");
 
       return response.text();
     } catch (error) {
-      // Erro - tratamento de falhas
-      console.error("Erro no upload:", error);
-      throw error;
+      console.error("Erro no processamento/upload:", error);
+
+      // Alertas específicos
+      if (error.message.includes("createResizedImage")) {
+        Alert.alert("Erro ao processar", "Falha ao redimensionar a imagem");
+      } else {
+        Alert.alert("Erro no upload", "Falha ao enviar para o servidor");
+      }
+
+      navigation.navigate("ErrorPhoto");
     }
   };
 
@@ -285,21 +298,6 @@ export default function CameraScreen() {
       _takePhoto();
     }
   }, [isGazing]);
-
-  const handleTakePhoto = async () => {
-    try {
-      const photo = await camera.current.takePhoto();
-      setPhoto(false);
-      const { path } = photo;
-      setServerPhotoPath(path);
-      setIsGazing(false);
-      await uploadImageToComlurb(path, matricula);
-      navigation.navigate("Sucesso");
-    } catch (error) {
-      setIsGazing(false); // Resetar mesmo em caso de erro
-      setPhoto(false);
-    }
-  };
 
   const handleDetectedFaces = useCallback(
     Worklets.createRunOnJS((facesJson) => {

@@ -15,8 +15,14 @@ const image = require("../../../assets/login.jpg"); // Caminho relativo para sua
 
 export default function LoginScreen() {
   const navigation = useNavigation();
-  const { setServerPhotoPath, matricula, setMatricula, arquivos, setArquivos } =
-    appContext();
+  const {
+    setServerPhotoPath,
+    matricula,
+    setMatricula,
+    arquivos,
+    setArquivos,
+    resetaTudo,
+  } = appContext();
 
   /**
    * Lista todos os arquivos de imagens disponíveis no servidor
@@ -42,7 +48,7 @@ export default function LoginScreen() {
         }
       })
       .catch((error) => {
-        console.error("Erro ao listar imagens:", error);
+        navigation.navigate("ErrorListar");
       });
   };
 
@@ -116,6 +122,7 @@ export default function LoginScreen() {
   };
 
   useEffect(() => {
+    resetaTudo();
     listServerImages();
   }, []);
 
