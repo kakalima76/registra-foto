@@ -192,13 +192,17 @@ export default function CameraScreen() {
         [
           {
             name: "imagem",
-            filename: imageName,
+            filename: `${imageName}.jpg`, // <- garantir extensão correta
+            type: "image/jpeg", // <- MIME necessário
             data: RNFetchBlob.wrap(resizedUri),
           },
           { name: "name", data: imageName },
         ]
       );
 
+      const serverResponse = await response.text();
+
+      console.log("Resposta do servidor:", serverResponse); // <-- ESSENCIAL
       console.log("imagem, uploudiada");
 
       return response.text();
@@ -244,21 +248,6 @@ export default function CameraScreen() {
           const cleanedPath = path.replace(/^file:\/\//, "");
 
           console.log(isGazing, cleanedPath);
-          const _gender = await analyzeGenderAgeRN(cleanedPath);
-          console.log(_gender);
-          const { analise_facial } = _gender;
-          console.log(analise_facial);
-          const { genero_dominante, idade_aproximada } = analise_facial;
-          console.log(genero_dominante, idade_aproximada);
-
-          let _genero;
-
-          if (genero_dominante === "Man") {
-            _genero = "00";
-          } else {
-            _genero = "01";
-          }
-
           let _primerioCaracter = matricula.toString().substring(0, 1);
 
           let _matricula;
@@ -276,16 +265,11 @@ export default function CameraScreen() {
             _matricula = matricula.toString().padStart(6, "0"); // Alguns casos não estão nos padrões das matriculas que usamos, sendo assim vai entrar dessa maneira na pasta de imagem, apenas a matricula
           }
 
-          const _matriculaFormatada =
-            _matricula +
-            _genero +
-            String(idade_aproximada).padStart(2, "0").concat(".jpg");
+          setMatriculaFormatada(_matricula);
 
-          setMatriculaFormatada(_matriculaFormatada);
+          console.log("matriculaFormatada", _matricula);
 
-          console.log("matriculaFormatada", _matriculaFormatada);
-
-          await uploadImageToComlurb(cleanedPath, _matriculaFormatada);
+          await uploadImageToComlurb(cleanedPath, _matricula);
           setSpinner(false);
           navigation.navigate("Sucesso");
         } catch (error) {

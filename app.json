@@ -28,7 +28,7 @@
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.nieraldo.cameraappvisioncamerajs"
+      "package": "com.upload.registrafotos"
     },
     "web": {
       "favicon": "./assets/favicon.png"

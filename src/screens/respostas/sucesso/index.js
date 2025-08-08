@@ -48,7 +48,7 @@ export default function SucessoScreen() {
         },
         // Corpo da requisição: os dados devem ser formatados como 'chave=valor'
         // URLSearchParams ajuda a garantir a formatação correta para x-www-form-urlencoded
-        `image_name=${encodeURIComponent(matriculFormatada)}`
+        `image_name=${encodeURIComponent(matriculFormatada + ".jpg")}`
       );
 
       // Converte a resposta para texto (JSON string)

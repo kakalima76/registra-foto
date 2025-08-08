@@ -1,4 +1,4 @@
-package com.nieraldo.cameraappvisioncamerajs
+package com.upload.registrafotos
 
 import android.app.Application
 import android.content.res.Configuration

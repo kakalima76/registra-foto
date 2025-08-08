@@ -13,6 +13,19 @@ import { appContext } from "@/src/context";
 
 const image = require("../../../assets/login.jpg"); // Caminho relativo para sua imagem
 
+/**
+ * Retorna a primeira palavra da lista que contém a parte informada.
+ *
+ * @param {string[]} lista - Lista de palavras para buscar.
+ * @param {string} parte - Parte da palavra a ser procurada.
+ * @returns {string|null} A palavra correspondente ou null se nenhuma for encontrada.
+ */
+function encontrarPalavraPorParte(lista, parte) {
+  if (!Array.isArray(lista) || typeof parte !== "string") return null;
+
+  return lista.find((palavra) => palavra.includes(parte)) || null;
+}
+
 export default function LoginScreen() {
   const navigation = useNavigation();
   const {
@@ -44,6 +57,7 @@ export default function LoginScreen() {
         if (response.respInfo.status === 200) {
           const jsonData = JSON.parse(response.data);
           const { files } = jsonData;
+          console.log(files);
           setArquivos(files);
         }
       })
@@ -74,7 +88,7 @@ export default function LoginScreen() {
    * await downloadImage();
    * // O resultado é tratado via navegação e estados da aplicação
    */
-  const downloadImage = async () => {
+  const downloadImage = async (matricula) => {
     console.log("matricula", matricula);
 
     if (!matricula) {
@@ -85,23 +99,31 @@ export default function LoginScreen() {
       navigation.navigate("Camera");
     }
 
-    const _files = arquivos.map((x) => x.substring(0, 8));
-    let _includes = _files.includes(matricula);
-    let _matricula;
-    console.log(_files);
+    let _matricula = encontrarPalavraPorParte(arquivos, matricula);
+    console.log(arquivos, _matricula, matricula);
 
-    const filter = arquivos.filter((x) => x.substring(0, 8) === matricula)[0];
-    _matricula = filter;
-    console.log("_matricula", _matricula, _includes);
-
-    if (!_includes) {
+    if (!_matricula) {
       navigation.navigate("Luz");
       return;
     } else {
-      setMatricula(filter);
+      //Uso estes testes para saber que tipo de prefixo por em cada foto, para busca-las no servidor adequadamente!
+      if (matricula.toString().length <= 6) {
+        _matricula = "014" + matricula.toString().padStart(6, "0");
+      }
+
+      if (_primerioCaracter === "8" && matricula.toString().length >= 6) {
+        _matricula = "0" + matricula.toString().padStart(6, "0");
+      }
+
+      if (matricula.length > 6 && _primerioCaracter != "8") {
+        _matricula = matricula.toString().padStart(6, "0"); // Alguns casos não estão nos padrões das matriculas que usamos, sendo assim vai entrar dessa maneira na pasta de imagem, apenas a matricula
+      }
+
+      console.log(_matricula);
+      setMatricula(_matricula);
     }
 
-    const imageUrl = `https://comlurbdev.rio.rj.gov.br/extranet/Fotos/fotoRecoginizer/downlaod.php?file=${_matricula}`;
+    const imageUrl = `https://comlurbdev.rio.rj.gov.br/extranet/Fotos/fotoRecoginizer/downlaod.php?file=${_matricula}.jpg`;
 
     console.log(imageUrl);
 
@@ -168,7 +190,7 @@ export default function LoginScreen() {
               </Input>
               <Button
                 className='w-72 h-16 rounded-full bg-blue-100 self-center' // self-center para centralizar o botão dentro do VStack
-                onPress={async () => await downloadImage()}
+                onPress={async () => await downloadImage(matricula)}
               >
                 <ButtonText className='text-3xl text-blue-950'>
                   acessar
