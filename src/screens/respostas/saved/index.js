@@ -14,7 +14,7 @@ export default function SavedScreen() {
 
   const handleOK = () => {
     setServerPhotoPath(null);
-    navigation.navigate("Login");
+    navigation.navigate("AvisoBiometria");
   };
 
   return (
@@ -35,13 +35,13 @@ export default function SavedScreen() {
           // Estilizando a segunda linha
           className='text-green-500 text-xl text-center'
         >
-          Sua foto já está atualizada
+          Foto Localizada
         </Text>
         <Text
           // Estilizando a segunda linha
           className='text-green-500 text-xl text-center'
         >
-          em nossa base de dados
+          Prossiga com seu acesso ao local
         </Text>
 
         <Image
@@ -58,7 +58,9 @@ export default function SavedScreen() {
           className='h-32 w-32 bg-green-800 rounded-full mt-6'
           onPress={handleOK}
         >
-          <ButtonText className='text-2xl'>OK</ButtonText>
+          <ButtonText className='text-2xl text-center'>
+            liberar acesso
+          </ButtonText>
         </Button>
       </VStack>
     </GluestackUIProvider>

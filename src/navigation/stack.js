@@ -13,6 +13,8 @@ import InsucessoScreen from "../screens/respostas/insucesso";
 import ErrorPhotoScreen from "../screens/respostas/errors";
 import SavedScreen from "../screens/respostas/saved";
 import ErrorListarScreen from "../screens/respostas/errors/listar";
+import AvisoBiometriaScreen from "../screens/aviso/biometria";
+import VerificacaoSucessoBiometriaScreen from "../screens/respostas/sucesso/biometria";
 
 // Importe suas telas
 
@@ -37,6 +39,18 @@ function AppStack() {
           'component' é o componente React a ser renderizado.
           'options' permite customizar o cabeçalho e outras configurações da tela.
         */}
+
+        <Stack.Screen
+          name='VerificacaoBiometria'
+          component={VerificacaoSucessoBiometriaScreen}
+          options={{ headerShown: false }} // Título do cabeçalho para a tela inicial
+        />
+
+        <Stack.Screen
+          name='AvisoBiometria'
+          component={AvisoBiometriaScreen}
+          options={{ headerShown: false }} // Título do cabeçalho para a tela inicial
+        />
 
         <Stack.Screen
           name='Login'

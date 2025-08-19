@@ -1,25 +1,39 @@
-// src/context/AppContext.js (Nome do arquivo sugerido)
+// src/context/AppContext.js
 import React, { createContext, useState, useContext } from "react";
 
-// 1. Crie o Contexto
-// O valor padrão (aqui, um objeto vazio) é usado quando um componente
-// tenta consumir o contexto sem um provedor acima na árvore.
+/**
+ * Contexto global da aplicação.
+ * Fornece acesso a estados compartilhados como fotos, matrícula e arquivos.
+ * @type {React.Context<Object>}
+ */
 const AppContext = createContext({});
 
 /**
- * 2. Crie um Componente Provedor (Provider)
- * Este componente envolverá os componentes que precisam acessar o contexto.
- * Ele gerencia o estado que será compartilhado.
+ * Componente Provedor do AppContext.
+ * Envolve componentes que precisam acessar estados globais da aplicação.
+ *
+ * @param {Object} props - Propriedades do componente.
+ * @param {React.ReactNode} props.children - Elementos filhos que terão acesso ao contexto.
+ * @returns {JSX.Element} O provedor com os valores do contexto.
  */
 export const AppProvider = ({ children }) => {
-  const [photoPath, setPhotoPath] = useState(null); // Caminho da foto tirada pela camedra do app
-  const [serverPhotoPath, setServerPhotoPath] = useState(null); // Caminho da foto usada no passaport
+  /** Caminho local da foto tirada pela câmera */
+  const [photoPath, setPhotoPath] = useState(null);
+
+  /** Caminho da foto armazenada no servidor (ex.: passaporte) */
+  const [serverPhotoPath, setServerPhotoPath] = useState(null);
+
+  /** Matrícula do usuário */
   const [matricula, setMatricula] = useState(null);
+
+  /** Matrícula formatada para exibição */
   const [matriculFormatada, setMatriculaFormatada] = useState(null);
+
+  /** Lista de arquivos anexados pelo usuário */
   const [arquivos, setArquivos] = useState([]);
 
   /**
-   * Reseta todos os estados relacionados à foto, matrícula e arquivos para seus valores iniciais.
+   * Reseta todos os estados do contexto para seus valores iniciais.
    * @returns {void}
    */
   const resetaTudo = () => {
@@ -30,7 +44,7 @@ export const AppProvider = ({ children }) => {
     setArquivos([]);
   };
 
-  // O valor que será disponibilizado para os componentes filhos
+  /** Valores e funções disponíveis no contexto */
   const AppContextValue = {
     photoPath,
     setPhotoPath,
@@ -53,13 +67,16 @@ export const AppProvider = ({ children }) => {
 };
 
 /**
- * 3. Crie um Hook Personalizado para Consumir o Contexto (Recomendado)
- * Este hook facilita o consumo do contexto em qualquer componente funcional.
+ * Hook personalizado para consumir o AppContext.
+ * Facilita o acesso a estados globais dentro de componentes funcionais.
+ *
+ * @throws {Error} Lança erro se o hook for usado fora de um AppProvider.
+ * @returns {Object} Objeto contendo estados e setters do contexto.
  */
 export const appContext = () => {
   const context = useContext(AppContext);
   if (context === undefined) {
-    throw new Error("useCount deve ser usado dentro de um AppProvider");
+    throw new Error("appContext deve ser usado dentro de um AppProvider");
   }
   return context;
 };
